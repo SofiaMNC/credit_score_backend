@@ -1,0 +1,1560 @@
+openapi: 3.0.1
+info:
+  title: Credit Score Predictor
+  description: This is an API to fetch a credit score for a loan seeker. The credit
+    scores go from 0 to 10, 10 indicating a prospect most likely to reimburse its
+    loan.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: contact@madimedia.pro
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: https://localhost:8080/v2
+- url: http://localhost:8080/v2
+tags:
+- name: Self
+  description: Operations on the service itself
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Credit Scores
+  description: Your clients' credit scores
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: New Clients
+  description: To integrate new clients
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Application
+  description: Your clients' main application information
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Bureau
+  description: Data concerning your client's previous credits from other financial
+    institutions
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Bureau Balance
+  description: Monthly data about the previous credits in bureau
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Cash
+  description: Monthly data about previous point of sale of cash loans clients have
+    had.
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Card
+  description: Monthly data about previous credit cards clients have had.
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Installments
+  description: Payment history for previous loans.
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+- name: Previous Application
+  description: Previous application information for loans.
+  externalDocs:
+    description: Find out more
+    url: https://gitlab.com/madimedia_sas/scoring_model
+paths:
+  /self_check:
+    get:
+      tags:
+      - Self
+      summary: Checks that the service is fully functional
+      description: For valid response try integer IDs with value >= 1 and <= 10.
+      operationId: self_check
+      responses:
+        "200":
+          description: The service is fully functional.
+          content: {}
+        "500":
+          description: Internal server error
+          content: {}
+        "503":
+          description: Service unavailable
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.self_controller
+  /train_model:
+    put:
+      tags:
+      - Self
+      summary: Trains the model on new data
+      description: 'The model will be trained on the new data provided. BEWARE : This
+        operation might take a few minutes'
+      operationId: train_model
+      requestBody:
+        description: Train model on new data at URL given
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        "200":
+          description: The model has been retrained on the new data.
+          content: {}
+        "408":
+          description: Request Timeout
+          content: {}
+        "500":
+          description: Internal server error
+          content: {}
+      x-codegen-request-body-name: body
+      x-openapi-router-controller: swagger_server.controllers.self_controller
+  /credit_scores:
+    get:
+      tags:
+      - Credit Scores
+      summary: Get the credit scores of all clients
+      description: Returns all clients' credit score
+      operationId: get_clients_credit_score
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditScores'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+        "500":
+          description: Internal Server Error
+          content: {}
+        "503":
+          description: Service Unavailable
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.credit_scores_controller
+  /credit_score/{clientId}:
+    get:
+      tags:
+      - Credit Scores
+      summary: Get credit score of a client by ID
+      description: Returns a single credit score
+      operationId: get_client_credit_score
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditScore'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.credit_scores_controller
+  /clients:
+    post:
+      tags:
+      - New Clients
+      summary: Integrate new clients
+      description: Integrates new clients' info in the database, and predicts their
+        credit score
+      operationId: new_clients
+      requestBody:
+        description: Integrates new clients' info in the database, and predicts their
+          credit score
+        content:
+          text/plain:
+            schema:
+              type: string
+        required: true
+      responses:
+        "201":
+          description: Clients created, credit scores predicted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditScores'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-codegen-request-body-name: body
+      x-openapi-router-controller: swagger_server.controllers.new_clients_controller
+  /applications:
+    get:
+      tags:
+      - Application
+      summary: Get all clients' banking information
+      description: Returns banking information for all clients
+      operationId: get_clients_app_info
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleApplicationInformation'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+  /application/{clientId}:
+    get:
+      tags:
+      - Application
+      summary: Get a client's banking information by ID
+      description: Returns a single client's banking information
+      operationId: get_client_app_info
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationInformation'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.application_controller
+  /bureau:
+    get:
+      tags:
+      - Bureau
+      summary: Get all clients' bureau information
+      description: Returns bureau information for all clients
+      operationId: get_clients_bureau_info
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleBureauInformation'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.bureau_controller
+  /bureau/{clientId}:
+    get:
+      tags:
+      - Bureau
+      summary: Get a client's bureau information by ID
+      description: Returns a single client's bureau information
+      operationId: get_client_bureau_info
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BureauInformation'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.bureau_controller
+  /bureau_balance:
+    get:
+      tags:
+      - Bureau Balance
+      summary: Get all clients' bureau balance information
+      description: Returns bureau balance information for all clients
+      operationId: get_clients_bureau_balance_info
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleBureauBalanceInformation'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.bureau_balance_controller
+  /bureau_balance/{clientId}:
+    get:
+      tags:
+      - Bureau Balance
+      summary: Get a client's bureau balance information by ID
+      description: Returns a single client's bureau balance information
+      operationId: get_client_bureau_balance_info
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BureauBalanceInformation'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.bureau_balance_controller
+  /cash:
+    get:
+      tags:
+      - Cash
+      summary: Get all clients' cash information
+      description: Returns cash information for all clients
+      operationId: get_clients_cash_info
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleCashInformation'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.cash_controller
+  /cash/{clientId}:
+    get:
+      tags:
+      - Cash
+      summary: Get a client's cash information by ID
+      description: Returns a single client's cash information
+      operationId: get_client_cash_info
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CashInformation'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.cash_controller
+  /card:
+    get:
+      tags:
+      - Card
+      summary: Get all clients' card information
+      description: Returns card information for all clients
+      operationId: get_clients_card_info
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleCardInformation'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.card_controller
+  /card/{clientId}:
+    get:
+      tags:
+      - Card
+      summary: Get a client's card information by ID
+      description: Returns a single client's card information
+      operationId: get_client_card_info
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardInformation'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.card_controller
+  /installments:
+    get:
+      tags:
+      - Installments
+      summary: Get all clients' installment information
+      description: Returns installments information for all clients
+      operationId: get_clients_installment_info
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultipleInstallmentInformation'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.installments_controller
+  /installment/{clientId}:
+    get:
+      tags:
+      - Installments
+      summary: Get a client's installment information by ID
+      description: Returns a single client's installment information
+      operationId: get_client_installment_info
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InstallmentInformation'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.installments_controller
+  /previous_applications:
+    get:
+      tags:
+      - Previous Application
+      summary: Get all clients' bureau information
+      description: Returns previous application information for all clients
+      operationId: get_clients_previous_app_info
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MultiplePreviousApplicationInformation'
+        "400":
+          description: Bad Request
+          content: {}
+        "405":
+          description: Invalid input
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.previous_application_controller
+  /previous_application/{clientId}:
+    get:
+      tags:
+      - Previous Application
+      summary: Get a client's banking information by ID
+      description: Returns a single client's previous application information
+      operationId: get_client_previous_app_info
+      parameters:
+      - name: clientId
+        in: path
+        description: ID of client
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviousApplicationInformation'
+        "400":
+          description: Invalid ID supplied
+          content: {}
+        "404":
+          description: Client not found
+          content: {}
+      x-openapi-router-controller: swagger_server.controllers.previous_application_controller
+components:
+  schemas:
+    ClientID:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Dupont
+      example:
+        name: Dupont
+        id: 1
+    CreditScore:
+      type: object
+      properties:
+        clientId:
+          $ref: '#/components/schemas/ClientID'
+        credit_score:
+          type: number
+          example: 9.9
+      example:
+        credit_score: 9.9
+        clientId:
+          name: Dupont
+          id: 1
+    CreditScores:
+      type: array
+      example:
+      - clientId:
+          id: 1
+          name: Dupont
+        credit_score: 9.9
+      - clientId:
+          id: 2
+          name: Lowensky
+        credit_score: 10
+      items:
+        $ref: '#/components/schemas/CreditScore'
+    ApplicationInformation:
+      type: object
+      properties:
+        AMT_ANNUITY:
+          type: number
+          description: Loan annuity
+        AMT_CREDI:
+          type: number
+          description: Credit amount of the loan
+        AMT_INCOME_TOTAL:
+          type: number
+          description: Income of the client
+        AMT_REQ_CREDIT_BUREAU_QRT:
+          type: integer
+          description: Number of enquiries to Credit Bureau about the client 3 month
+            before application (excluding one month before application)
+        APARTMENTS_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        BASEMENTAREA_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        CODE_GENDER:
+          type: string
+          description: Gender of the client
+          enum:
+          - M
+          - F
+          - XNA
+        COMMONAREA_AVG:
+          type: integer
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        DAYS_BIRTH:
+          type: number
+          description: Client's age in days at the time of application
+        DAYS_EMPLOYED:
+          type: integer
+          description: How many days before the application the person started current
+            employment
+        DAYS_ID_PUBLISH:
+          type: integer
+          description: How many days before the application did client change the
+            identity document with which he applied for the loan
+        DAYS_LAST_PHONE_CHANGE:
+          type: integer
+          description: How many days before application did client change phone
+        DAYS_REGISTRATION:
+          type: integer
+          description: How many days before the application did client change his
+            registration
+        DEF_30_CNT_SOCIAL_CIRCLE:
+          type: integer
+          description: How many observation of client's social surroundings defaulted
+            on 30 DPD (days past due)
+        DEF_60_CNT_SOCIAL_CIRCLE:
+          type: integer
+          description: How many observation of client's social surroundings defaulted
+            on 60 (days past due) DPD
+        ELEVATORS_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        ENTRANCES_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        EXT_SOURCE_1:
+          type: number
+          description: Normalized score from external data source
+        EXT_SOURCE_2:
+          type: number
+          description: Normalized score from external data source
+        EXT_SOURCE_3:
+          type: number
+          description: Normalized score from external data source
+        FLAG_DOCUMENT_16:
+          type: boolean
+          description: Did client provide document 16
+          default: false
+        FLAG_DOCUMENT_18:
+          type: boolean
+          description: Did client provide document 18
+          default: false
+        FLAG_DOCUMENT_3:
+          type: boolean
+          description: Did client provide document 3
+          default: false
+        FLAG_WORK_PHONE:
+          type: boolean
+          description: Did client provide home phone (1=YES, 0=NO)
+          default: false
+        FLOORSMAX_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        FLOORSMIN_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        HOUR_APPR_PROCESS_START:
+          type: integer
+          description: Approximately at what hour did the client apply for the loan
+        LANDAREA_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        NAME_CONTRACT_TYPE:
+          type: string
+          description: Identification if loan is cash or revolving
+          enum:
+          - Cash loans
+          - Revolving loans
+        NAME_EDUCATION_TYPE:
+          type: string
+          description: Level of highest education the client achieved
+          enum:
+          - Secondary / secondary special
+          - Higher education
+          - Incomplete higher
+          - Lower secondary
+          - Academic degree
+        NAME_FAMILY_STATUS:
+          type: string
+          description: Family status of the client
+          enum:
+          - Single / not married
+          - Married
+          - Civil marriage
+          - Widow
+          - Separated
+          - Unknown
+        NAME_INCOME_TYPE:
+          type: string
+          description: Clients income type (businessman, working, maternity leave,…)
+          enum:
+          - Working
+          - State servant
+          - Commercial associate
+          - Pensioner
+          - Unemployed
+          - Student
+          - Businessman
+          - Maternity leave
+        NAME_TYPE_SUITE:
+          type: string
+          description: Who was accompanying client when he was applying for the loan
+          enum:
+          - Unaccompanied
+          - Family
+          - Spouse, partner
+          - Children
+          - Other_A
+          - Other_B
+          - Group of people
+        NONLIVINGAPARTMENTS_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        NONLIVINGAREA_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        OBS_30_CNT_SOCIAL_CIRCLE:
+          type: integer
+          description: How many observation of client's social surroundings with observable
+            30 DPD (days past due) default
+        OCCUPATION_TYPE:
+          type: string
+          description: What kind of occupation does the client have
+          enum:
+          - Laborers
+          - Core staff
+          - Accountants
+          - Managers
+          - Drivers
+          - Sales staff
+          - Cleaning staff
+          - Cooking staff
+          - Private service staff
+          - Medicine staff
+          - Security staff
+          - High skill tech staff
+          - Waiters/barmen staff
+          - Low-skill Laborers
+          - Realty agents
+          - Secretaries
+          - IT staff
+          - HR staff
+        ORGANIZATION_TYPE:
+          type: string
+          description: Type of organization where client works
+          enum:
+          - Business Entity Type 3
+          - School
+          - Government
+          - Religion
+          - Other
+          - XNA
+          - Electricity
+          - Medicine
+          - Business Entity Type 2
+          - Self-employed
+          - 'Transport: type 2'
+          - Construction
+          - Housing
+          - Kindergarten
+          - 'Trade: type 7'
+          - 'Industry: type 11'
+          - Military
+          - Services
+          - Security Ministries
+          - 'Transport: type 4'
+          - 'Industry: type 1'
+          - Emergency
+          - Security
+          - 'Trade: type 2'
+          - University
+          - 'Transport: type 3'
+          - Police
+          - Business Entity Type 1
+          - Postal
+          - 'Industry: type 4'
+          - Agriculture
+          - Restaurant
+          - Culture
+          - Hotel
+          - 'Industry: type 7'
+          - 'Trade: type 3'
+          - 'Industry: type 3'
+          - Bank
+          - 'Industry: type 9'
+          - Insurance
+          - 'Trade: type 6'
+          - 'Industry: type 2'
+          - 'Transport: type 1'
+          - 'Industry: type 12'
+          - Mobile
+          - 'Trade: type 1'
+          - 'Industry: type 5'
+          - 'Industry: type 10'
+          - Legal Services
+          - Advertising
+          - 'Trade: type 5'
+          - Cleaning
+          - 'Industry: type 13'
+          - 'Trade: type 4'
+          - Telecom
+          - 'Industry: type 8'
+          - Realtor
+          - 'Industry: type 6'
+        OWN_CAR_AGE:
+          type: integer
+          description: Age of client's car
+        REG_CITY_NOT_LIVE_CITY:
+          type: boolean
+          description: Flag if client's permanent address does not match contact address
+            (1=different, 0=same, at city level)
+          default: false
+        REGION_POPULATION_RELATIVE:
+          type: number
+          description: Normalized population of region where client lives (higher
+            number means the client lives in more populated region)
+        REGION_RATING_CLIENT:
+          type: integer
+          description: Our rating of the region where client lives (1,2,3)
+        SK_ID_CURR:
+          type: integer
+          description: ID of loan in our sample
+        TARGET:
+          type: boolean
+          description: 'Target variable (1 - client with payment difficulties: he/she
+            had late payment more than X days on at least one of the first Y installments
+            of the loan in our sample, 0 - all other cases)'
+          default: false
+        YEARS_BEGINEXPLUATATION_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+        YEARS_BUILD_AVG:
+          type: number
+          description: Normalized information about building where the client lives,
+            What is average (_AVG suffix), modus (_MODE suffix), median (_MEDI suffix)
+            apartment size, common area, living area, age of building, number of elevators,
+            number of entrances, state of the building, number of floor
+      example:
+        AMT_INCOME_TOTAL: 1.46581298050294517310021547018550336360931396484375
+        ELEVATORS_AVG: 1.489415909854170383397331534069962799549102783203125
+        NAME_FAMILY_STATUS: Single / not married
+        TARGET: false
+        DEF_30_CNT_SOCIAL_CIRCLE: 1
+        YEARS_BEGINEXPLUATATION_AVG: 6.77832496304801335185175048536621034145355224609375
+        REGION_POPULATION_RELATIVE: 6.96511769763884558415156789124011993408203125
+        DAYS_BIRTH: 9.301444243932575517419536481611430644989013671875
+        DAYS_LAST_PHONE_CHANGE: 4
+        NAME_EDUCATION_TYPE: Secondary / secondary special
+        COMMONAREA_AVG: 7
+        DEF_60_CNT_SOCIAL_CIRCLE: 1
+        APARTMENTS_AVG: 5.63737665663332876420099637471139430999755859375
+        NAME_CONTRACT_TYPE: Cash loans
+        HOUR_APPR_PROCESS_START: 9
+        FLAG_DOCUMENT_16: false
+        FLAG_DOCUMENT_3: false
+        REG_CITY_NOT_LIVE_CITY: false
+        FLAG_DOCUMENT_18: false
+        FLAG_WORK_PHONE: false
+        SK_ID_CURR: 2
+        FLOORSMAX_AVG: 5.02500479152029466689555192715488374233245849609375
+        AMT_REQ_CREDIT_BUREAU_QRT: 5
+        FLOORSMIN_AVG: 9.965781217890562260208753286860883235931396484375
+        NONLIVINGAPARTMENTS_AVG: 8.7620420127490010742121739895083010196685791015625
+        OBS_30_CNT_SOCIAL_CIRCLE: 6
+        NAME_INCOME_TYPE: Working
+        ORGANIZATION_TYPE: Business Entity Type 3
+        REGION_RATING_CLIENT: 1
+        ENTRANCES_AVG: 6.8468526983526398765889098285697400569915771484375
+        NONLIVINGAREA_AVG: 9.0183481860707832566959041287191212177276611328125
+        AMT_ANNUITY: 0.80082819046101150206595775671303272247314453125
+        LANDAREA_AVG: 6.683562403749608193948006373830139636993408203125
+        EXT_SOURCE_1: 7.4577447736837658709418974467553198337554931640625
+        BASEMENTAREA_AVG: 2.3021358869347654518833223846741020679473876953125
+        YEARS_BUILD_AVG: 6.87805222012787620400331434211693704128265380859375
+        OWN_CAR_AGE: 3
+        EXT_SOURCE_2: 1.173074250955943309548956676735542714595794677734375
+        OCCUPATION_TYPE: Laborers
+        EXT_SOURCE_3: 4.9652184929849543237878606305457651615142822265625
+        DAYS_REGISTRATION: 7
+        AMT_CREDI: 6.02745618307040320615897144307382404804229736328125
+        DAYS_ID_PUBLISH: 2
+        DAYS_EMPLOYED: 3
+        CODE_GENDER: M
+        NAME_TYPE_SUITE: Unaccompanied
+    MultipleApplicationInformation:
+      type: array
+      items:
+        $ref: '#/components/schemas/ApplicationInformation'
+    BureauInformation:
+      type: object
+      properties:
+        AMT_ANNUITY:
+          type: number
+          description: Annuity of the Credit Bureau credit
+        CREDIT_ACTIVE:
+          type: string
+          description: Status of the Credit Bureau (CB) reported credits
+          enum:
+          - Closed
+          - Active
+          - Sold
+          - Bad debt
+        CREDIT_TYPE:
+          type: string
+          description: Type of Credit Bureau credit (Car, cash,...)
+          enum:
+          - Consumer credit
+          - Credit card
+          - Mortgage
+          - Car loan
+          - Microloan
+          - Loan for working capital replenishment
+          - Loan for business development
+          - Real estate loan
+          - Unknown type of loan
+          - Another type of loan
+          - Cash loan (non-earmarked)
+          - Loan for the purchase of equipment
+          - Mobile operator loan
+          - Interbank credit
+          - Loan for purchase of shares (margin lending)
+        DAYS_CREDIT:
+          type: integer
+          description: How many days before current application did client apply for
+            Credit Bureau credit
+        DAYS_CREDIT_ENDDATE:
+          type: integer
+          description: Remaining duration of CB credit (in days) at the time of application
+            in Home Credit
+        AMT_CREDIT_SUM:
+          type: number
+          description: Current credit amount for the Credit Bureau credit
+        AMT_CREDIT_SUM_DEBT:
+          type: number
+          description: Current debt on Credit Bureau credit
+        AMT_CREDIT_SUM_LIMIT:
+          type: number
+          description: Current credit limit of credit card reported in Credit Bureau
+        AMT_CREDIT_SUM_OVERDUE:
+          type: number
+          description: Current amount overdue on Credit Bureau credit
+        DAYS_ENDDATE_FACT:
+          type: integer
+          description: Days since CB credit ended at the time of application in Home
+            Credit (only for closed credit)
+        SK_BUREAU_ID:
+          type: integer
+          description: Recoded ID of previous Credit Bureau credit related to our
+            loan (unique coding for each loan application)
+        SK_ID_CURR:
+          type: integer
+          description: ID of loan in our sample - one loan in our sample can have
+            0,1,2 or more related previous credits in credit bureau
+      example:
+        AMT_CREDIT_SUM: 5.962133916683182377482808078639209270477294921875
+        SK_BUREAU_ID: 3
+        CREDIT_TYPE: Consumer credit
+        DAYS_ENDDATE_FACT: 9
+        AMT_CREDIT_SUM_DEBT: 5.63737665663332876420099637471139430999755859375
+        AMT_CREDIT_SUM_LIMIT: 2.3021358869347654518833223846741020679473876953125
+        DAYS_CREDIT: 6
+        DAYS_CREDIT_ENDDATE: 1
+        SK_ID_CURR: 2
+        CREDIT_ACTIVE: Closed
+        AMT_CREDIT_SUM_OVERDUE: 7.061401241503109105224211816675961017608642578125
+        AMT_ANNUITY: 0.80082819046101150206595775671303272247314453125
+    MultipleBureauInformation:
+      type: array
+      items:
+        $ref: '#/components/schemas/BureauInformation'
+    BureauBalanceInformation:
+      type: object
+      properties:
+        MONTHS_BALANCE:
+          type: integer
+          description: Month of balance relative to application date (-1 means the
+            freshest balance date)
+        SK_BUREAU_ID:
+          type: integer
+          description: Recoded ID of Credit Bureau credit (unique coding for each
+            application) - use this to join to CREDIT_BUREAU table
+        STATUS:
+          type: string
+          description: Status of Credit Bureau loan during the month (active, closed,
+            DPD0-30,… [C means closed, X means status unknown, 0 means no DPD, 1 means
+            maximal did during month between 1-30, 2 means DPD 31-60,… 5 means DPD
+            120+ or sold or written off ] )
+          enum:
+          - C
+          - "0"
+          - X
+          - "1"
+          - "2"
+          - "3"
+          - "5"
+          - "4"
+      example:
+        SK_BUREAU_ID: 6
+        STATUS: C
+        MONTHS_BALANCE: 0
+    MultipleBureauBalanceInformation:
+      type: array
+      items:
+        $ref: '#/components/schemas/BureauBalanceInformation'
+    CardInformation:
+      type: object
+      properties:
+        AMT_BALANCE:
+          type: number
+          description: Balance during the month of previous credit
+        AMT_CREDIT_LIMIT_ACTUAL:
+          type: number
+          description: Credit card limit during the month of the previous credit
+        AMT_DRAWINGS_ATM_CURRENT:
+          type: number
+          description: Amount drawing at ATM during the month of the previous credit
+        AMT_DRAWINGS_CURRENT:
+          type: number
+          description: Amount drawing during the month of the previous credit
+        AMT_DRAWINGS_POS_CURRENT:
+          type: number
+          description: Amount drawing or buying goods during the month of the previous
+            credit
+        AMT_PAYMENT_CURRENT:
+          type: number
+          description: How much did the client pay during the month on the previous
+            credit
+        CNT_DRAWINGS_ATM_CURRENT:
+          type: integer
+          description: Number of drawings at ATM during this month on the previous
+            credit
+        CNT_DRAWINGS_CURRENT:
+          type: integer
+          description: Number of drawings during this month on the previous credit
+        CNT_DRAWINGS_POS_CURRENT:
+          type: integer
+          description: Number of drawings for goods during this month on the previous
+            credit
+        CNT_INSTALMENT_MATURE_CUM:
+          type: integer
+          description: Number of paid installments on the previous credit
+        MONTHS_BALANCE:
+          type: integer
+          description: Month of balance relative to application date (-1 means the
+            freshest balance date)
+        NAME_CONTRACT_STATUS:
+          type: string
+          description: Contract status (active signed,...) on the previous credit
+          enum:
+          - Active
+          - Completed
+          - Demand
+          - Signed
+          - Sent proposal
+          - Refused
+          - Approved
+        SK_DPD_DEF:
+          type: integer
+          description: DPD (Days past due) during the month with tolerance (debts
+            with low loan amounts are ignored) of the previous credit
+        SK_ID_CURR:
+          type: integer
+          description: ID of loan in our sample
+        SK_ID_PREV:
+          type: integer
+          description: ID of previous credit in Home credit related to loan in our
+            sample. (One loan in our sample can have 0,1,2 or more previous loans
+            in Home Credit)
+      example:
+        CNT_DRAWINGS_ATM_CURRENT: 7
+        AMT_DRAWINGS_POS_CURRENT: 5.63737665663332876420099637471139430999755859375
+        AMT_BALANCE: 0.80082819046101150206595775671303272247314453125
+        AMT_CREDIT_LIMIT_ACTUAL: 6.02745618307040320615897144307382404804229736328125
+        AMT_DRAWINGS_ATM_CURRENT: 1.46581298050294517310021547018550336360931396484375
+        SK_ID_PREV: 1
+        AMT_DRAWINGS_CURRENT: 5.962133916683182377482808078639209270477294921875
+        CNT_DRAWINGS_POS_CURRENT: 3
+        CNT_DRAWINGS_CURRENT: 9
+        AMT_PAYMENT_CURRENT: 2.3021358869347654518833223846741020679473876953125
+        SK_DPD_DEF: 7
+        CNT_INSTALMENT_MATURE_CUM: 2
+        SK_ID_CURR: 1
+        MONTHS_BALANCE: 4
+        NAME_CONTRACT_STATUS: Active
+    MultipleCardInformation:
+      type: array
+      items:
+        $ref: '#/components/schemas/CardInformation'
+    CashInformation:
+      type: object
+      properties:
+        CNT_INSTALMENT:
+          type: integer
+          description: Term of previous credit (can change over time)
+        CNT_INSTALMENT_FUTURE:
+          type: integer
+          description: Installments left to pay on the previous credit
+        MONTHS_BALANCE:
+          type: integer
+          description: Month of balance relative to application date (-1 means the
+            information to the freshest monthly snapshot, 0 means the information
+            at application - often it will be the same as -1 as many banks are not
+            updating the information to Credit Bureau regularly )
+        NAME_CONTRACT_STATUS:
+          type: string
+          description: Contract status during the month
+          enum:
+          - Active
+          - Completed
+          - Signed
+          - Approved
+          - Returned to the store
+          - Demand
+          - Canceled
+          - XNA
+          - Amortized debt
+        SK_DPD:
+          type: integer
+          description: DPD (days past due) during the month of previous credit
+        SK_ID_CURR:
+          type: integer
+          description: ID of loan in our sample
+        SK_ID_PREV:
+          type: integer
+          description: ID of previous credit in Home Credit related to loan in our
+            sample. (One loan in our sample can have 0,1,2 or more previous loans
+            in Home Credit)
+      example:
+        CNT_INSTALMENT: 0
+        CNT_INSTALMENT_FUTURE: 6
+        SK_ID_CURR: 5
+        MONTHS_BALANCE: 1
+        SK_ID_PREV: 2
+        NAME_CONTRACT_STATUS: Active
+        SK_DPD: 5
+    MultipleCashInformation:
+      type: array
+      items:
+        $ref: '#/components/schemas/CashInformation'
+    InstallmentInformation:
+      type: object
+      properties:
+        AMT_INSTALMENT:
+          type: number
+          description: What was the prescribed installment amount of previous credit
+            on this installment
+        AMT_PAYMENT:
+          type: number
+          description: What the client actually paid on previous credit on this installment
+        DAYS_INSTALMENT:
+          type: integer
+          description: When the installment of previous credit was supposed to be
+            paid (relative to application date of current loan)
+        NUM_INSTALMENT_NUMBER:
+          type: integer
+          description: On which installment we observe payment
+        NUM_INSTALMENT_VERSION:
+          type: integer
+          description: Version of installment calendar (0 is for credit card) of previous
+            credit. Change of installment version from month to month signifies that
+            some parameter of payment calendar has changed
+        SK_ID_CURR:
+          type: integer
+          description: ID of loan in our sample
+        SK_ID_PREV:
+          type: integer
+          description: ID of previous credit in Home credit related to loan in our
+            sample. (One loan in our sample can have 0,1,2 or more previous loans
+            in Home Credit)
+      example:
+        AMT_INSTALMENT: 0.80082819046101150206595775671303272247314453125
+        NUM_INSTALMENT_VERSION: 5
+        NUM_INSTALMENT_NUMBER: 5
+        DAYS_INSTALMENT: 1
+        SK_ID_CURR: 2
+        AMT_PAYMENT: 6.02745618307040320615897144307382404804229736328125
+        SK_ID_PREV: 7
+    MultipleInstallmentInformation:
+      type: array
+      items:
+        $ref: '#/components/schemas/InstallmentInformation'
+    PreviousApplicationInformation:
+      type: object
+      properties:
+        AMT_ANNUITY:
+          type: number
+          description: Annuity of previous application
+        AMT_APPLICATION:
+          type: number
+          description: For how much credit did client ask on the previous application
+        AMT_DOWN_PAYMENT:
+          type: number
+          description: Down payment on the previous application
+        AMT_GOODS_PRICE:
+          type: number
+          description: Goods price of good that client asked for (if applicable) on
+            the previous application
+        CHANNEL_TYPE:
+          type: string
+          description: Through which channel we acquired the client on the previous
+            application
+          enum:
+          - Country-wide
+          - Contact center
+          - Credit and cash offices
+          - Stone
+          - Regional / Local
+          - AP+ (Cash loan)
+          - Channel of corporate sales
+          - Car dealer
+        CNT_PAYMENT:
+          type: integer
+          description: Term of previous credit at application of the previous application
+        CODE_REJECT_REASON:
+          type: string
+          description: Why was the previous application rejected
+          enum:
+          - XAP
+          - HC
+          - LIMIT
+          - CLIENT
+          - SCOFR
+          - SCO
+          - XNA
+          - VERIF
+          - SYSTEM
+        DAYS_DECISION:
+          type: integer
+          description: Relative to current application when was the decision about
+            previous application made
+        DAYS_FIRST_DRAWING:
+          type: integer
+          description: Relative to application date of current application when was
+            the first disbursement of the previous application
+        DAYS_FIRST_DUE:
+          type: integer
+          description: Relative to application date of current application when was
+            the first due supposed to be of the previous application
+        DAYS_LAST_DUE:
+          type: integer
+          description: Relative to application date of current application when was
+            the last due date of the previous application
+        DAYS_LAST_DUE_1ST_VERSION:
+          type: integer
+          description: Relative to application date of current application when was
+            the first due of the previous application
+        HOUR_APPR_PROCESS_START:
+          type: integer
+          description: Approximately at what day hour did the client apply for the
+            previous application
+        NAME_CASH_LOAN_PURPOSE:
+          type: string
+          description: Purpose of the cash loan
+          enum:
+          - XAP
+          - XNA
+          - Repairs
+          - Everyday expenses
+          - Car repairs
+          - Building a house or an annex
+          - Other
+          - Journey
+          - Purchase of electronic equipment
+          - Medicine
+          - Payments on other loans
+          - Urgent needs
+          - Buying a used car
+          - Buying a new car
+          - Buying a holiday home / land
+          - Education
+          - Buying a home
+          - Furniture
+          - Buying a garage
+          - Business development
+          - Wedding / gift / holiday
+          - Hobby
+          - Gasification / water supply
+          - Refusal to name the goal
+          - Money for a third person
+        NAME_CLIENT_TYPE:
+          type: string
+          description: Was the client old or new client when applying for the previous
+            application
+          enum:
+          - Repeater
+          - New
+          - Refreshed
+          - XNA
+        NAME_CONTRACT_STATUS:
+          type: string
+          description: Contract status (approved, cancelled, ...) of previous application
+          enum:
+          - Approved
+          - Refused
+          - Canceled
+          - Unused offer
+        NAME_GOODS_CATEGORY:
+          type: string
+          description: What kind of goods did the client apply for in the previous
+            application
+          enum:
+          - Mobile
+          - XNA
+          - Consumer Electronics
+          - Construction Materials
+          - Auto Accessories
+          - Photo / Cinema Equipment
+          - Computers
+          - Audio/Video
+          - Medicine
+          - Clothing and Accessories
+          - Furniture
+          - Sport and Leisure
+          - Homewares
+          - Gardening
+          - Jewelry
+          - Vehicles
+          - Education
+          - Medical Supplies
+          - Other
+          - Direct Sales
+          - Office Appliances
+          - Fitness
+          - Tourism
+          - Insurance
+          - Additional Service
+          - Weapon
+          - Animals
+          - House Construction
+        NAME_PAYMENT_TYPE:
+          type: string
+          description: Payment method that client chose to pay for the previous application
+          enum:
+          - Cash through the bank
+          - XNA
+          - Non-cash from your account
+          - Cashless from the account of the employer
+        NAME_PORTFOLIO:
+          type: string
+          description: Was the previous application for CASH, POS, CAR, …
+          enum:
+          - POS
+          - Cash
+          - XNA
+          - Cards
+          - Cars
+        NAME_PRODUCT_TYPE:
+          type: string
+          description: Was the previous application x-sell o walk-in
+          enum:
+          - XNA
+          - x-sell
+          - walk-in
+        NAME_SELLER_INDUSTRY:
+          type: string
+          description: The industry of the seller
+          enum:
+          - Connectivity
+          - XNA
+          - Consumer electronics
+          - Industry
+          - Clothing
+          - Furniture
+          - Construction
+          - Jewelry
+          - Auto technology
+          - MLM partners
+          - Tourism
+        NAME_TYPE_SUITE:
+          type: string
+          description: Who accompanied client when applying for the previous application
+          enum:
+          - Unaccompanied
+          - Spouse, partner
+          - Family
+          - Children
+          - Other_B
+          - Other_A
+          - Group of people
+        NAME_YIELD_GROUP:
+          type: string
+          description: Grouped interest rate into small medium and high of the previous
+            application
+          enum:
+          - middle
+          - low_action
+          - high
+          - low_normal
+          - XNA
+        NFLAG_INSURED_ON_APPROVAL:
+          type: boolean
+          description: Did the client requested insurance during the previous application
+          default: false
+        PRODUCT_COMBINATION:
+          type: string
+          description: Detailed product combination of the previous application
+          enum:
+          - POS mobile with interest
+          - 'Cash X-Sell: low'
+          - 'Cash X-Sell: high'
+          - 'Cash X-Sell: middle'
+          - 'Cash Street: high'
+          - Cash
+          - POS household without interest
+          - POS household with interest
+          - POS other with interest
+          - Card X-Sell
+          - POS mobile without interest
+          - Card Street
+          - POS industry with interest
+          - 'Cash Street: low'
+          - POS industry without interest
+          - 'Cash Street: middle'
+          - POS others without interest
+        RATE_DOWN_PAYMENT:
+          type: number
+          description: Down payment rate normalized on previous credit
+        SELLERPLACE_AREA:
+          type: integer
+          description: Selling area of seller place of the previous application
+        SK_ID_CURR:
+          type: integer
+          description: ID of loan in our sample
+        SK_ID_PREV:
+          type: integer
+          description: ID of previous credit in Home credit related to loan in our
+            sample. (One loan in our sample can have 0,1,2 or more previous loan applications
+            in Home Credit, previous application could, but not necessarily have to
+            lead to credit)
+        WEEKDAY_APPR_PROCESS_START:
+          type: string
+          description: On which day of the week did the client apply for previous
+            application
+          enum:
+          - SATURDAY
+          - THURSDAY
+          - TUESDAY
+          - MONDAY
+          - FRIDAY
+          - SUNDAY
+          - WEDNESDAY
+      example:
+        DAYS_FIRST_DRAWING: 7
+        DAYS_LAST_DUE_1ST_VERSION: 2
+        SK_ID_PREV: 1
+        CODE_REJECT_REASON: XAP
+        DAYS_FIRST_DUE: 9
+        DAYS_LAST_DUE: 3
+        HOUR_APPR_PROCESS_START: 4
+        WEEKDAY_APPR_PROCESS_START: SATURDAY
+        AMT_APPLICATION: 6.02745618307040320615897144307382404804229736328125
+        NAME_PAYMENT_TYPE: Cash through the bank
+        NAME_PORTFOLIO: POS
+        NAME_PRODUCT_TYPE: XNA
+        CNT_PAYMENT: 5
+        SK_ID_CURR: 1
+        CHANNEL_TYPE: Country-wide
+        NAME_SELLER_INDUSTRY: Connectivity
+        AMT_GOODS_PRICE: 5.962133916683182377482808078639209270477294921875
+        PRODUCT_COMBINATION: POS mobile with interest
+        RATE_DOWN_PAYMENT: 7.3862819483858839220147274318151175975799560546875
+        NAME_CLIENT_TYPE: Repeater
+        NFLAG_INSURED_ON_APPROVAL: false
+        AMT_ANNUITY: 0.80082819046101150206595775671303272247314453125
+        NAME_GOODS_CATEGORY: Mobile
+        NAME_YIELD_GROUP: middle
+        AMT_DOWN_PAYMENT: 1.46581298050294517310021547018550336360931396484375
+        DAYS_DECISION: 2
+        NAME_CASH_LOAN_PURPOSE: XAP
+        SELLERPLACE_AREA: 1
+        NAME_CONTRACT_STATUS: Approved
+        NAME_TYPE_SUITE: Unaccompanied
+    MultiplePreviousApplicationInformation:
+      type: array
+      items:
+        $ref: '#/components/schemas/InstallmentInformation'
+

@@ -1,0 +1,11 @@
+connexion[swagger-ui] == 2.7.0
+python_dateutil >= 2.6.0
+setuptools >= 21.0.0
+Werkzeug == 1.0.0
+
+joblib==0.14.1
+lightgbm==3.0.0
+pandas==1.0.1
+
+requests==2.22.0
+waitress==1.4.4

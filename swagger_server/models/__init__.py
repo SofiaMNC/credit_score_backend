@@ -1,0 +1,22 @@
+# coding: utf-8
+
+# flake8: noqa
+from __future__ import absolute_import
+# import models into model package
+from swagger_server.models.application_information import ApplicationInformation
+from swagger_server.models.bureau_balance_information import BureauBalanceInformation
+from swagger_server.models.bureau_information import BureauInformation
+from swagger_server.models.card_information import CardInformation
+from swagger_server.models.cash_information import CashInformation
+from swagger_server.models.client_id import ClientID
+from swagger_server.models.credit_score import CreditScore
+from swagger_server.models.credit_scores import CreditScores
+from swagger_server.models.installment_information import InstallmentInformation
+from swagger_server.models.multiple_application_information import MultipleApplicationInformation
+from swagger_server.models.multiple_bureau_balance_information import MultipleBureauBalanceInformation
+from swagger_server.models.multiple_bureau_information import MultipleBureauInformation
+from swagger_server.models.multiple_card_information import MultipleCardInformation
+from swagger_server.models.multiple_cash_information import MultipleCashInformation
+from swagger_server.models.multiple_installment_information import MultipleInstallmentInformation
+from swagger_server.models.multiple_previous_application_information import MultiplePreviousApplicationInformation
+from swagger_server.models.previous_application_information import PreviousApplicationInformation
