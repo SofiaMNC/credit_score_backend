@@ -3,5 +3,3 @@ build:
    web: ./Dockerfile
  config:
    REQUIREMENTS_FILENAME: heroku.yaml
-run:
-web: waitress-serve --port=$PORT credit_score_backend:swagger_server

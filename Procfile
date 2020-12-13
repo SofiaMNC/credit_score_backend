@@ -1,1 +1,1 @@
-web: waitress-serve --port=$PORT
+web: waitress-serve --port=$PORT swagger_server:test_serve
