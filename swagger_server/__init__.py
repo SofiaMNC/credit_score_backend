@@ -8,3 +8,6 @@ def serve_api():
     app.app.json_encoder = encoder.JSONEncoder
     app.add_api('swagger.yaml', arguments={'title': 'Credit Score Predictor'}, pythonic_params=True)
     serve(app, host="0.0.0.0", port=8080)
+    return app
+
+init_app = serve_api()
