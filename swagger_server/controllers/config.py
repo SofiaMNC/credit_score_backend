@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from joblib import load
 import requests
@@ -50,7 +51,7 @@ def download_csv_to_pd(url):
     rawData = rawData.drop(rawData.columns[0], axis=1)
 
     return convert_types(rawData)
-    
+
 #---------------------- Variables ----------------------#
 
 SAVED_DATA_BUCKET_URL = 'https://scoringapp.s3.eu-west-3.amazonaws.com/saved_data/'
