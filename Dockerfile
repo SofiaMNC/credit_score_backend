@@ -13,10 +13,6 @@ RUN apt-get update && \
     apt-get -y --no-install-recommends install \
     libgomp1
 
-#RUN pip3 install pandas
-#RUN pip3 install joblib
-#RUN pip3 install lightgbm
-
 COPY . /usr/src/app
 
 EXPOSE 8080

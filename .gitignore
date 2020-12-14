@@ -1,0 +1,3 @@
+swagger_server/__pycache__/*
+swagger_server/controllers/__pycache__/*
+swagger_server/models/__pycache__/*

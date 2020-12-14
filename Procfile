@@ -1,1 +1,0 @@
-web: waitress-serve --port=$PORT swagger_server:init_app
