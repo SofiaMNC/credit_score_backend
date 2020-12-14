@@ -3,5 +3,3 @@ build:
    web: ./Dockerfile
  config:
    REQUIREMENTS_FILENAME: heroku.yml
-#run:
-#  web: waitress-serve --port=$PORT swagger_server:init_app
