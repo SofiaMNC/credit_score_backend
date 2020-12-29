@@ -22,54 +22,54 @@ tags:
   description: Operations on the service itself
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Credit Scores
   description: Your clients' credit scores
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: New Clients
   description: To integrate new clients
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Application
   description: Your clients' main application information
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Bureau
   description: Data concerning your client's previous credits from other financial
     institutions
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Bureau Balance
   description: Monthly data about the previous credits in bureau
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Cash
   description: Monthly data about previous point of sale of cash loans clients have
     had.
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Card
   description: Monthly data about previous credit cards clients have had.
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Installments
   description: Payment history for previous loans.
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 - name: Previous Application
   description: Previous application information for loans.
   externalDocs:
     description: Find out more
-    url: https://gitlab.com/madimedia_sas/scoring_model
+    url: https://github.com/madimedia/credit_score_backend
 paths:
   /self_check:
     get:
@@ -571,42 +571,22 @@ paths:
       x-openapi-router-controller: swagger_server.controllers.previous_application_controller
 components:
   schemas:
-    ClientID:
-      type: object
-      properties:
-        id:
-          type: integer
-          example: 1
-        name:
-          type: string
-          example: Dupont
-      example:
-        name: Dupont
-        id: 1
     CreditScore:
       type: object
       properties:
-        clientId:
-          $ref: '#/components/schemas/ClientID'
-        credit_score:
+        SK_ID_CURR:
+          type: number
+          example: 100001
+        Credit Score:
           type: number
           example: 9.9
-      example:
-        credit_score: 9.9
-        clientId:
-          name: Dupont
-          id: 1
     CreditScores:
       type: array
       example:
-      - clientId:
-          id: 1
-          name: Dupont
+      - SK_ID_CURR: 100001
         credit_score: 9.9
-      - clientId:
-          id: 2
-          name: Lowensky
-        credit_score: 10
+      - SK_ID_CURR: 100002
+        credit_score: 10.0
       items:
         $ref: '#/components/schemas/CreditScore'
     ApplicationInformation:
