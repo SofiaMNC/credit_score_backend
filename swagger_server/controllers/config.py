@@ -66,7 +66,7 @@ saved_datadir = "swagger_server/data/saved_data/"
 
 print("Loading training data into dataframes...")
 
-SAVED_APP_DATA = download_csv_to_pd(SAVED_DATA_BUCKET_URL+"app_test.csv")
+SAVED_APP_DATA = download_csv_to_pd(SAVED_DATA_BUCKET_URL+"application_test.csv")
 
 SAVED_BUREAU_DATA = download_csv_to_pd(SAVED_DATA_BUCKET_URL+"bureau_test.csv")
 
