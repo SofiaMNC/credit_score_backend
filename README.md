@@ -1,7 +1,7 @@
 # Credit Scoring Web App - Backend
 *Sofia Chevrolat (December 2020)*
 
-[![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
+[![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://madimedia.pro)
 
 ![](https://img.shields.io/badge/USES-Docker-2496ED?style=for-the-badge&logo=Docker)
 
