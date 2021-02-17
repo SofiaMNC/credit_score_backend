@@ -1,4 +1,12 @@
 # Credit Scoring Web App - Backend
+*Sofia Chevrolat (December 2020)*
+
+![](https://img.shields.io/badge/DOCUMENTED_WITH-Swagger-85EA2D?style=for-the-badge&logo=Swagger)
+
+![](https://img.shields.io/badge/USES-Docker-2496ED?style=for-the-badge&logo=Docker)
+
+![](https://img.shields.io/badge/REST_API_SERVER-Heroku-430098?style=for-the-badge&logo=Heroku)
+![](https://img.shields.io/badge/DOCUMENTED_WITH-Swagger-85EA2D?style=for-the-badge&logo=Swagger)
 
 ## Overview
 This is the backend of the credit scoring web app. 
